@@ -52,7 +52,7 @@ echo "newer" >release-"$pkgname"
 wget https://sourceforge.net/projects/infozip/files/UnZip%206.x%20%28latest%29/UnZip%206.0/unzip60.tar.gz
 tar xf unzip60.tar.gz
 rm -f unzip60.tar.gz
-mv zunzip60 unzip
+mv unzip60 unzip
 
 cd "$pkg_git_repo_dir" || exit
 wget https://www.linuxfromscratch.org/patches/blfs/12.2/unzip-6.0-consolidated_fixes-1.patch
