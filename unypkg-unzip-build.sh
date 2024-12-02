@@ -35,25 +35,31 @@ mkdir -pv /uny/sources
 cd /uny/sources || exit
 
 pkgname="unzip"
-pkggit="https://github.com/unzip/unzip.git refs/tags/*"
-gitdepth="--depth=1"
+pkggit=""
+gitdepth=""
 
 ### Get version info from git remote
 # shellcheck disable=SC2086
-latest_head="$(git ls-remote --refs --tags --sort="v:refname" $pkggit | grep -E "v[0-9.]+$" | tail --lines=1)"
-latest_ver="$(echo "$latest_head" | grep -o "v[0-9.].*" | sed "s|v||")"
-latest_commit_id="$(echo "$latest_head" | cut --fields=1)"
+latest_head="no-head"
+latest_ver="6.0"
+latest_commit_id="no-commit"
 
 version_details
 
 # Release package no matter what:
 echo "newer" >release-"$pkgname"
 
-git_clone_source_repo
+wget https://sourceforge.net/projects/infozip/files/UnZip%206.x%20%28latest%29/UnZip%206.0/unzip60.tar.gz
+tar xf unzip60.tar.gz
+rm -f unzip60.tar.gz
+mv zunzip60 unzip
 
-#cd "$pkg_git_repo_dir" || exit
-#./autogen.sh
-#cd /uny/sources || exit
+cd "$pkg_git_repo_dir" || exit
+wget https://www.linuxfromscratch.org/patches/blfs/12.2/unzip-6.0-consolidated_fixes-1.patch
+wget https://www.linuxfromscratch.org/patches/blfs/12.2/unzip-6.0-gcc14-1.patch
+patch -Np1 -i unzip-6.0-consolidated_fixes-1.patch
+patch -Np1 -i unzip-6.0-gcc14-1.patch
+cd /uny/sources || exit
 
 archiving_source
 
@@ -77,12 +83,9 @@ get_include_paths
 
 unset LD_RUN_PATH
 
-./configure \
-    --prefix=/uny/pkg/"$pkgname"/"$pkgver"
+make -j"$(nproc)" -f unix/Makefile generic
 
-make -j"$(nproc)"
-make -j"$(nproc)" check 
-make -j"$(nproc)" install
+make -j"$(nproc)" prefix=/uny/pkg/"$pkgname"/"$pkgver" -f unix/Makefile install
 
 ####################################################
 ### End of individual build script
